@@ -19,6 +19,21 @@ spring:
       maximum-pool-size: 15
       minimum-idle: 5
       idle-timeout: 30000
+  # MailProperties
+  # 声明访问邮箱的域名
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: 1198279536@qq.com
+    password: tzgvyoiflmqmjhed
+    protocol: smtps
+    properties:
+      # 安全连接
+      mail:
+        smtp:
+          ssl:
+            enable: true
+
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -28,8 +43,10 @@ mybatis:
     use-generated-keys: true # 启用id自增长
     map-underscore-to-camel-case: true # 下划线字段与驼峰属性匹配
 
-
-
+# community 域名设置
+community:
+  path:
+    domain: http://localhost:8080
 
 
 
