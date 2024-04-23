@@ -1,0 +1,35 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /community
+
+# THYMELEAF (ThymeleafAutoConfiguration)
+spring:
+  thymeleaf:
+    cache: false
+  # DataSourceProperties
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/community?characterEncoding=utf-8&useSSL=false&serverTimeZone=Hongkong
+    username: root
+    password: 123456
+    # 连接池的配置
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 5
+      idle-timeout: 30000
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.peaceful.community.domain
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    use-generated-keys: true # 启用id自增长
+    map-underscore-to-camel-case: true # 下划线字段与驼峰属性匹配
+
+
+
+
+
+
