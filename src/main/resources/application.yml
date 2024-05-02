@@ -47,6 +47,7 @@ mybatis:
 community:
   path:
     domain: http://localhost:8080
+    upload: E:/11计算机自学课程/data/upload
 
 
 

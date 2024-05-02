@@ -1,7 +1,10 @@
 package com.peaceful.community.service;
 
+import com.peaceful.community.dao.LoginTicketMapper;
 import com.peaceful.community.dao.UserMapper;
+import com.peaceful.community.domain.LoginTicket;
 import com.peaceful.community.domain.User;
+import com.peaceful.community.util.CommunityConstant;
 import com.peaceful.community.util.CommunityUtil;
 import com.peaceful.community.util.MailClient;
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +20,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
-public class UserService {
+public class UserService implements CommunityConstant {
 
     @Autowired
     private UserMapper userMapper;
@@ -25,12 +28,15 @@ public class UserService {
     private MailClient mailClient; // 邮件客户端
     @Autowired
     private TemplateEngine templateEngine; // 模板引擎
+
+    @Autowired
+    private LoginTicketMapper loginTicketMapper; // 登录凭证
     /*
     *   发送邮件时，要生成一个激活码，激活码中包含域名和项目名
     * */
     @Value("${community.path.domain}")
     private String domain;
-    @Value("${server.servlet.contextPath}")
+    @Value("${server.servlet.context-path}")
     private String contextPath;
     // 根据用户di查询用户的方法
     public User findUserById(int id){
@@ -99,6 +105,85 @@ public class UserService {
 
         return map; // 空的，表示没有问题
     }
+
+    /**
+     * 处理激活逻辑
+     */
+
+    public int activation(int userId, String code){
+        User user = userMapper.selectById(userId);
+        if(user.getStatus() == 1){
+            return ACTIVATION_RESET;
+        } else if (user.getActivationCode().equals(code)) {
+            userMapper.updateStatus(userId,1);
+            return ACTIVATION_SUCCESS;
+        }else {
+            return ACTIVATION_FAILURE;
+        }
+    }
+
+    // 登录
+    public Map<String, Object> login(String username, String password, int experiedSeconds){
+        Map<String, Object> map = new HashMap<>();
+
+        // 空值判断
+        if(StringUtils.isBlank(username)){
+            map.put("usernameMsg", "账号不能为空！");
+            return map;
+        }
+        if(StringUtils.isBlank(password)){
+            map.put("passwordMsg", "密码不能为空！");
+            return map;
+        }
+
+        // 验证账号
+        User user = userMapper.selectByName(username);
+        if(user == null){
+            map.put("usernameMsg", "账号不存在！");
+            return map;
+        }
+        // 验证状态
+        if(user.getStatus() == 0){
+            map.put("usernameMsg", "该账号未激活!");
+            return map;
+        }
+        // 验证密码
+        password = CommunityUtil.MD5(user.getPassword()+user.getSalt());
+        if(user.getPassword().equals(password)){
+            map.put("passwordMsg", "密码不正确!");
+            return map;
+        }
+
+        // 生成凭证
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(CommunityUtil.generateUUID());
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis()+experiedSeconds*1000));
+        loginTicketMapper.insertLoginTicket(loginTicket); // 注册凭证
+
+        map.put("ticket", loginTicket.getTicket());
+        return map;
+    }
+
+    // 退出
+    public void logout(String ticket){
+        loginTicketMapper.updateStatus(ticket, 1);
+    }
+
+
+    // 查询凭证
+    public LoginTicket findLoginTicket(String ticket){
+        return loginTicketMapper.selectByTicket(ticket);
+    }
+
+    // 更新用户头像
+    public int updateHeader(int userId, String headerUrl){
+        return userMapper.updateHeader(userId, headerUrl);
+    }
+
+
+
 
 
 }
