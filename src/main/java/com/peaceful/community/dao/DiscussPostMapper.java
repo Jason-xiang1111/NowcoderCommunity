@@ -19,4 +19,10 @@ public interface DiscussPostMapper {
     // 在动态sql中需要使用的条件，并且这个方法有且只有一个参数必须加@Param
     // 若只有一个参数，并且在<if>中使用，则必须加别名
     int selectDiscussPostRows(@Param("userId") int userId);
+
+    // 增加帖子的方法
+    int insertDiscussPost(DiscussPost discussPost);
+
+    // 查询帖子详情
+    DiscussPost selectDiscussPostById(int id);
 }
