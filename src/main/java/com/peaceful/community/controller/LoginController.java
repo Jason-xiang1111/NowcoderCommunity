@@ -146,7 +146,6 @@ public class LoginController implements CommunityConstant {
             model.addAttribute("passwordMsg", map.get("passwordMsg"));
             return "/site/login";
         }
-
     }
 
     // 退出
@@ -155,10 +154,5 @@ public class LoginController implements CommunityConstant {
         userService.logout(ticket);
         return "redirect:/login"; // 默认get请求
     }
-
-
-
-
-
 
 }

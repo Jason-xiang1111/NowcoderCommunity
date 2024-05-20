@@ -43,15 +43,18 @@ public class UserController {
         return "/site/setting";
     }
 
+    /* 用户访问到设置页面服务*/
     // 处理上传文件
     @LoginRequired
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model){
+        // 一个文件就声明一个MultipartFile，如果多个就声明一个数组
         if(headerImage == null){
             model.addAttribute("error", "还没有上传图片！");
             return  "/site/setting";
         }
 
+        // 上传文件名的随机名生成，以免多个上传重复覆盖
         String fileName = headerImage.getOriginalFilename();
         // 最后一个“.”的索引位置往后截取
         String suffix = fileName.substring(fileName.lastIndexOf("."));
@@ -72,15 +75,18 @@ public class UserController {
         }
 
         // 更新当前用户头像的路径(web访问路径)
+        // 允许外界访问的web路径
+        // 下面专门提供了一个请求服务的来解决外界访问的web路径问题
         // http://localhost:8080/community/user/header/xxx.png
         User user = hostHolder.getUser();
-        String headUrl = domain+contextPath+"/user/header"+fileName;
+        String headUrl = domain+contextPath+"/user/header/"+fileName;
         userService.updateHeader(user.getId(), headUrl);
 
         return "redirect:/index";
     }
 
     // 获取头像 二进制
+    // / 下面专门提供了一个请求服务的来解决外界访问的web路径问题
     @RequestMapping(path = "/header/{fileName}", method = RequestMethod.GET)
     public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response){
         // 服务器存放路径
